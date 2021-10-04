@@ -28,7 +28,7 @@ class MessageBusClient {
             "err": "",
         };
     }
-    send(message, payload) {
+    async send(message, payload) {
         const buffer = Buffer.from(payload);
         message.dat = buffer.toString("base64");
         const request = JSON.stringify(message);

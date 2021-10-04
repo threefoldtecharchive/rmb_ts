@@ -15,7 +15,7 @@ declare class MessageBusClient {
         now: number;
         err: string;
     };
-    send(message: any, payload: any): any;
+    send(message: any, payload: any): Promise<any>;
     read(message: any): Promise<unknown>;
 }
 export { MessageBusClient };
