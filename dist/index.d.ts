@@ -1,1 +1,2 @@
-export * from './httpClient';
+export * from "./client";
+export * from "./clientInterface";
