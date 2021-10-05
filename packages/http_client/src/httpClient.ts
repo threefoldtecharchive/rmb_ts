@@ -1,6 +1,6 @@
 import { default as axios } from "axios";
 
-import { MessageBusClientInterface } from "../../base/clientInterface";
+import { MessageBusClientInterface } from "ts-rmb-client-base";
 
 function decodeBase64(s: string): string {
     let b: number,
@@ -31,7 +31,7 @@ class HTTPMessageBusClient implements MessageBusClientInterface {
         this.proxyURL = proxyURL;
     }
 
-    prepare(command: string, destination: number[], expiration: number, retry: number) {
+    prepare(command: string, destination: number[], expiration: number, retry: number): Record<string, unknown> {
         return {
             ver: 1,
             uid: "",

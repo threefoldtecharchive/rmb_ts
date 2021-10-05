@@ -1,12 +1,7 @@
 {
-    "name": "rmb-client",
-    "author": "Mahmoud Ayoub",
+    "name": "ts-rmb-client-base",
+    "author": "Mohammed Essam",
     "version": "0.0.1",
-    "dependencies": {
-        "ts-rmb-client-base": "^0.0.1",
-        "typescript": "^4.3.5",
-        "axios": "^0.22.0"
-    },
     "main": "dist/index.js",
     "types": "dist/index.d.ts",
     "files": [
@@ -19,10 +14,5 @@
         "eslint-plugin-prettier": "^4.0.0",
         "prettier": "^2.4.1",
         "typescript": "^4.4.3"
-    },
-    "description": "Threefold RMB client using HTTP",
-    "scripts": {
-        "test": "echo \"Error: no test specified\" && exit 1"
-    },
-    "license": "ISC"
+    }
 }
