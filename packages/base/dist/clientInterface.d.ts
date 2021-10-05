@@ -4,5 +4,4 @@ interface MessageBusClientInterface {
     send(message: Record<string, unknown>, payload: string): Promise<Record<string, unknown>>;
     read(message: Record<string, unknown>): Promise<Record<string, unknown>[]>;
 }
-
 export { MessageBusClientInterface };
