@@ -1,2 +1,2 @@
-# rmb-redis-client
-Threefold RMB client using Redis
+# rmb-http-client
+Threefold RMB client using HTTP

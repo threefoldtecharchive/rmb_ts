@@ -1,7 +1,8 @@
+import redis from "redis";
 declare class MessageBusServer {
-    client: any;
+    client: redis;
     handlers: any;
-    constructor(port: any);
+    constructor(port: number);
     withHandler(topic: any, handler: any): void;
     run(): void;
     reply(message: any, payload: any): void;
