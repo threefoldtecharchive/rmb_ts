@@ -1,2 +1,2 @@
-# rmb-http-client
-Threefold RMB client using HTTP
+# rmb-client
+Threefold RMB client

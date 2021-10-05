@@ -1,23 +1,60 @@
 {
-    "name": "rmb-http-client",
-    "author": "Mahmoud Ayoub",
-    "version": "0.0.1",
-    "dependencies": {
-        "@types/node": "^16.4.10",
-        "typescript": "^4.3.5",
-        "axios": "^0.22.0"
+    "name": "rmb-client",
+    "private": true,
+    "version": "1.0.0",
+    "description": "",
+    "main": "index.js",
+    "scripts": {
+        "watch": "tsc -w",
+        "native:start": "cd packages/native && node link-workspaces.js && node node_modules/react-native/local-cli/cli.js start --config ../../../../packages/native/rn-cli-config.js --reset-cache",
+        "native:ios": "cd packages/native && react-native run-ios",
+        "native:android": "cd packages/native && react-native run-android",
+        "api:start": "cd packages/api && gulp",
+        "web:start": "cd packages/web && NODE_ENV=development && webpack-dev-server",
+        "packages:clean": "find . -name 'node_modules' -type d -prune -exec rm -rf '{}' +",
+        "test:watch": "jest --watchAll --notify",
+        "test:coverage": "npm run test -- --coverage=true"
     },
-    "main": "dist/index.js",
-    "types": "dist/index.d.ts",
-    "files": [
-        "/dist"
-    ],
+    "author": "",
+    "license": "MIT",
+    "workspaces": {
+        "packages": [
+            "packages/*"
+        ]
+    },
     "devDependencies": {
-        "@typescript-eslint/eslint-plugin": "^4.31.2",
-        "@typescript-eslint/parser": "^4.31.2",
-        "eslint": "^7.32.0",
-        "eslint-plugin-prettier": "^4.0.0",
-        "prettier": "^2.4.1",
-        "typescript": "^4.4.3"
+        "typescript": "^2.6.2"
+    },
+    "jest": {
+        "rootDir": ".",
+        "modulePaths": [
+            "<rootDir>"
+        ],
+        "moduleNameMapper": {
+            "~(.*)$": "<rootDir>/$1"
+        },
+        "testEnvironment": "node",
+        "moduleFileExtensions": [
+            "ts",
+            "js",
+            "json"
+        ],
+        "transform": {
+            ".(ts|tsx)": "./node_modules/ts-jest/preprocessor.js"
+        },
+        "testMatch": [
+            "**/__tests__/*.(ts|tsx)"
+        ],
+        "testResultsProcessor": "./node_modules/jest-junit-reporter",
+        "collectCoverageFrom": [
+            "<rootDir>/**/*.{ts,tsx,js}"
+        ],
+        "coverageDirectory": "./coverage",
+        "coverageReporters": [
+            "json",
+            "lcov",
+            "text",
+            "cobertura"
+        ]
     }
 }
