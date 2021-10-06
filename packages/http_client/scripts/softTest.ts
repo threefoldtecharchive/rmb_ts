@@ -5,19 +5,18 @@ function delay(s: number) {
 }
 
 async function main() {
-    const dstNodeId = 4;
+    const dstNodeId = 44;
 
     async function deploy() {
         const rmb = new HTTPMessageBusClient("https://rmbproxy1.devnet.grid.tf");
         const msg = rmb.prepare("zos.statistics.get", [dstNodeId], 0, 2);
-        console.log(msg);
         const retMsg = await rmb.send(msg, "{'test':'test'}");
-        console.log(retMsg);
         // set the retqueue to oringnal message
         await delay(7);
 
         const result = await rmb.read(retMsg);
-        console.log(`the read response is: ${JSON.stringify(result)}`);
+        console.log(`the read response is:`);
+        console.log(result);
     }
 
     deploy();
