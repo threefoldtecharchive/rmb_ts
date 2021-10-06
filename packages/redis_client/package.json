@@ -1,5 +1,5 @@
 {
-    "name": "rmb-redis-client",
+    "name": "ts-rmb-redis-client",
     "author": "Mohammed Essam",
     "version": "0.0.1",
     "dependencies": {

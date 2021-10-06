@@ -1,5 +1,6 @@
 import redis from "redis";
-declare class MessageBusClient {
+import { MessageBusClientInterface } from "ts-rmb-client-base";
+declare class MessageBusClient implements MessageBusClientInterface {
     client: redis;
     constructor(port?: number);
     prepare(command: string, destination: number[], expiration: number, retry: number): Record<string, unknown>;
