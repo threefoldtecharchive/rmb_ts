@@ -9,3 +9,4 @@ declare class MessageBusServer {
     error(message: any, reason: any): void;
 }
 export { MessageBusServer };
+//# sourceMappingURL=server.d.ts.map

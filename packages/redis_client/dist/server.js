@@ -1,15 +1,16 @@
-"use strict";
-var __importDefault = (this && this.__importDefault) || function (mod) {
-    return (mod && mod.__esModule) ? mod : { "default": mod };
+var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, generator) {
+    function adopt(value) { return value instanceof P ? value : new P(function (resolve) { resolve(value); }); }
+    return new (P || (P = Promise))(function (resolve, reject) {
+        function fulfilled(value) { try { step(generator.next(value)); } catch (e) { reject(e); } }
+        function rejected(value) { try { step(generator["throw"](value)); } catch (e) { reject(e); } }
+        function step(result) { result.done ? resolve(result.value) : adopt(result.value).then(fulfilled, rejected); }
+        step((generator = generator.apply(thisArg, _arguments || [])).next());
+    });
 };
-Object.defineProperty(exports, "__esModule", { value: true });
-exports.MessageBusServer = void 0;
-const redis_1 = __importDefault(require("redis"));
+import redis from "redis";
 class MessageBusServer {
-    client;
-    handlers;
     constructor(port) {
-        const client = redis_1.default.createClient(port);
+        const client = redis.createClient(port);
         client.on("error", function (error) {
             console.error(error);
         });
@@ -27,26 +28,28 @@ class MessageBusServer {
         });
         channels.push(0);
         const _this = this;
-        this.client.blpop(channels, async function (err, response) {
-            if (err)
-                console.log(err);
-            const [channel, request] = response;
-            if (!_this.handlers.has(channel)) {
-                console.log(`handler ${channel} is not initialized, skipping`);
-                return;
-            }
-            const parsedRequest = JSON.parse(request);
-            const payload = Buffer.from(parsedRequest.dat, "base64").toString("ascii");
-            const handler = _this.handlers.get(channel);
-            try {
-                const data = await handler(parsedRequest, payload);
-                console.log(`data from handler: ${data}`);
-                _this.reply(parsedRequest, data);
-            }
-            catch (error) {
-                _this.error(parsedRequest, error);
-            }
-            _this.run();
+        this.client.blpop(channels, function (err, response) {
+            return __awaiter(this, void 0, void 0, function* () {
+                if (err)
+                    console.log(err);
+                const [channel, request] = response;
+                if (!_this.handlers.has(channel)) {
+                    console.log(`handler ${channel} is not initialized, skipping`);
+                    return;
+                }
+                const parsedRequest = JSON.parse(request);
+                const payload = Buffer.from(parsedRequest.dat, "base64").toString("ascii");
+                const handler = _this.handlers.get(channel);
+                try {
+                    const data = yield handler(parsedRequest, payload);
+                    console.log(`data from handler: ${data}`);
+                    _this.reply(parsedRequest, data);
+                }
+                catch (error) {
+                    _this.error(parsedRequest, error);
+                }
+                _this.run();
+            });
         });
     }
     reply(message, payload) {
@@ -76,4 +79,4 @@ class MessageBusServer {
         });
     }
 }
-exports.MessageBusServer = MessageBusServer;
+export { MessageBusServer };

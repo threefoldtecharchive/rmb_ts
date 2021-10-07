@@ -1,15 +1,17 @@
-"use strict";
-var __importDefault = (this && this.__importDefault) || function (mod) {
-    return (mod && mod.__esModule) ? mod : { "default": mod };
+var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, generator) {
+    function adopt(value) { return value instanceof P ? value : new P(function (resolve) { resolve(value); }); }
+    return new (P || (P = Promise))(function (resolve, reject) {
+        function fulfilled(value) { try { step(generator.next(value)); } catch (e) { reject(e); } }
+        function rejected(value) { try { step(generator["throw"](value)); } catch (e) { reject(e); } }
+        function step(result) { result.done ? resolve(result.value) : adopt(result.value).then(fulfilled, rejected); }
+        step((generator = generator.apply(thisArg, _arguments || [])).next());
+    });
 };
-Object.defineProperty(exports, "__esModule", { value: true });
-exports.MessageBusClient = void 0;
-const redis_1 = __importDefault(require("redis"));
-const uuid4_1 = __importDefault(require("uuid4"));
+import redis from "redis";
+import uuid4 from "uuid4";
 class MessageBusClient {
-    client;
     constructor(port = 6379) {
-        const client = redis_1.default.createClient(port);
+        const client = redis.createClient(port);
         client.on("error", function (error) {
             console.error(error);
         });
@@ -24,20 +26,22 @@ class MessageBusClient {
             dat: "",
             src: 0,
             dst: destination,
-            ret: (0, uuid4_1.default)(),
+            ret: uuid4(),
             try: retry,
             shm: "",
             now: Math.floor(new Date().getTime() / 1000),
             err: "",
         };
     }
-    async send(message, payload) {
-        const buffer = Buffer.from(payload);
-        message.dat = buffer.toString("base64");
-        const request = JSON.stringify(message);
-        this.client.lpush(["msgbus.system.local", request], redis_1.default.print);
-        console.log(request);
-        return message;
+    send(message, payload) {
+        return __awaiter(this, void 0, void 0, function* () {
+            const buffer = Buffer.from(payload);
+            message.dat = buffer.toString("base64");
+            const request = JSON.stringify(message);
+            this.client.lpush(["msgbus.system.local", request], redis.print);
+            console.log(request);
+            return message;
+        });
     }
     read(message) {
         return new Promise((resolve, reject) => {
@@ -60,4 +64,4 @@ class MessageBusClient {
         });
     }
 }
-exports.MessageBusClient = MessageBusClient;
+export { MessageBusClient };
