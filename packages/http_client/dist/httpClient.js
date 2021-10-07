@@ -1,11 +1,14 @@
-"use strict";
-var __importDefault = (this && this.__importDefault) || function (mod) {
-    return (mod && mod.__esModule) ? mod : { "default": mod };
+var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, generator) {
+    function adopt(value) { return value instanceof P ? value : new P(function (resolve) { resolve(value); }); }
+    return new (P || (P = Promise))(function (resolve, reject) {
+        function fulfilled(value) { try { step(generator.next(value)); } catch (e) { reject(e); } }
+        function rejected(value) { try { step(generator["throw"](value)); } catch (e) { reject(e); } }
+        function step(result) { result.done ? resolve(result.value) : adopt(result.value).then(fulfilled, rejected); }
+        step((generator = generator.apply(thisArg, _arguments || [])).next());
+    });
 };
-Object.defineProperty(exports, "__esModule", { value: true });
-exports.HTTPMessageBusClient = void 0;
-const axios_1 = __importDefault(require("axios"));
-const js_base64_1 = require("js-base64");
+import axios from "axios";
+import { Base64 } from "js-base64";
 function validDestination(dst) {
     if (dst.length > 1) {
         return "Http client does not support multi destinations";
@@ -16,8 +19,6 @@ function validDestination(dst) {
     return "";
 }
 class HTTPMessageBusClient {
-    client;
-    proxyURL;
     constructor(proxyURL) {
         this.proxyURL = proxyURL;
     }
@@ -37,78 +38,82 @@ class HTTPMessageBusClient {
             err: "",
         };
     }
-    async send(message, payload) {
-        try {
-            message.dat = js_base64_1.Base64.encode(payload);
-            const dst = message.dst;
-            const retries = message.try; // amount of retries we're willing to do
-            const s = validDestination(dst);
-            if (s) {
-                throw new Error(s);
-            }
-            const body = JSON.stringify(message);
-            const url = `${this.proxyURL}/twin/${dst[0]}`;
-            let msgIdentifier;
-            for (let i = 1; i <= retries; i++) {
-                try {
-                    console.log(`Sending {try ${i}}: ${url}`);
-                    const res = await axios_1.default.post(url, body);
-                    console.log(`Sending {try ${i}}: Success`);
-                    msgIdentifier = JSON.parse(JSON.stringify(res.data));
-                    console.log(msgIdentifier);
-                    message.ret = msgIdentifier.retqueue;
-                    return message;
+    send(message, payload) {
+        return __awaiter(this, void 0, void 0, function* () {
+            try {
+                message.dat = Base64.encode(payload);
+                const dst = message.dst;
+                const retries = message.try; // amount of retries we're willing to do
+                const s = validDestination(dst);
+                if (s) {
+                    throw new Error(s);
                 }
-                catch (error) {
-                    if (i < retries) {
-                        console.log(`try ${i}: cannot send the message, Message: ${error.message}`);
-                        if (error.request.data) {
-                            console.log(error.request.data.message);
+                const body = JSON.stringify(message);
+                const url = `${this.proxyURL}/twin/${dst[0]}`;
+                let msgIdentifier;
+                for (let i = 1; i <= retries; i++) {
+                    try {
+                        console.log(`Sending {try ${i}}: ${url}`);
+                        const res = yield axios.post(url, body);
+                        console.log(`Sending {try ${i}}: Success`);
+                        msgIdentifier = JSON.parse(JSON.stringify(res.data));
+                        console.log(msgIdentifier);
+                        message.ret = msgIdentifier.retqueue;
+                        return message;
+                    }
+                    catch (error) {
+                        if (error.response.data) {
+                            console.log(error.response.data.message);
+                        }
+                        if (i < retries) {
+                            console.log(`try ${i}: cannot send the message, Message: ${error.message}`);
+                        }
+                        else {
+                            throw new Error(error.message);
                         }
                     }
-                    else {
-                        throw new Error(error.message);
-                    }
                 }
             }
-        }
-        catch (error) {
-            throw new Error(error.message);
-        }
+            catch (error) {
+                throw new Error(error.message);
+            }
+        });
     }
-    async read(message) {
-        try {
-            const dst = message.dst;
-            const retries = message.try; // amount of retries we're willing to do
-            const s = validDestination(dst);
-            const retqueue = message.ret;
-            const url = `${this.proxyURL}/twin/${dst[0]}/${retqueue}`;
-            if (s) {
-                throw new Error(s);
-            }
-            if (!retqueue) {
-                throw new Error("The Message retqueue is null");
-            }
-            for (let i = 1; i <= retries; i++) {
-                try {
-                    console.log(`Reading {try ${i}}: ${url}`);
-                    const res = await axios_1.default.post(url);
-                    return res.data;
+    read(message) {
+        return __awaiter(this, void 0, void 0, function* () {
+            try {
+                const dst = message.dst;
+                const retries = message.try; // amount of retries we're willing to do
+                const s = validDestination(dst);
+                const retqueue = message.ret;
+                const url = `${this.proxyURL}/twin/${dst[0]}/${retqueue}`;
+                if (s) {
+                    throw new Error(s);
                 }
-                catch (error) {
-                    if (i < retries) {
-                        console.log(`try ${i}: cannot read the message, Message: ${error.message}`);
-                    }
-                    else {
-                        throw new Error(error.message);
-                    }
+                if (!retqueue) {
+                    throw new Error("The Message retqueue is null");
                 }
-                console.log("read");
+                for (let i = 1; i <= retries; i++) {
+                    try {
+                        console.log(`Reading {try ${i}}: ${url}`);
+                        const res = yield axios.post(url);
+                        return res.data;
+                    }
+                    catch (error) {
+                        if (i < retries) {
+                            console.log(`try ${i}: cannot read the message, Message: ${error.message}`);
+                        }
+                        else {
+                            throw new Error(error.message);
+                        }
+                    }
+                    console.log("read");
+                }
             }
-        }
-        catch (error) {
-            throw new Error(error.message);
-        }
+            catch (error) {
+                throw new Error(error.message);
+            }
+        });
     }
 }
-exports.HTTPMessageBusClient = HTTPMessageBusClient;
+export { HTTPMessageBusClient };

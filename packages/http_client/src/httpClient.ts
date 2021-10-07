@@ -1,4 +1,4 @@
-import { default as axios } from "axios";
+import axios from "axios";
 import { Base64 } from "js-base64";
 
 import { MessageBusClientInterface } from "ts-rmb-client-base";
@@ -60,11 +60,11 @@ class HTTPMessageBusClient implements MessageBusClientInterface {
                     message.ret = msgIdentifier.retqueue;
                     return message;
                 } catch (error) {
+                    if (error.response.data) {
+                        console.log(error.response.data.message);
+                    }
                     if (i < retries) {
                         console.log(`try ${i}: cannot send the message, Message: ${error.message}`);
-                        if (error.request.data) {
-                            console.log(error.request.data.message);
-                        }
                     } else {
                         throw new Error(error.message);
                     }

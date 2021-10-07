@@ -8,3 +8,4 @@ declare class HTTPMessageBusClient implements MessageBusClientInterface {
     read(message: Record<string, unknown>): Promise<Record<string, unknown>[]>;
 }
 export { HTTPMessageBusClient };
+//# sourceMappingURL=httpClient.d.ts.map
