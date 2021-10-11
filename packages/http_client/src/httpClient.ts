@@ -15,8 +15,10 @@ function validDestination(dst: number[]): string {
 class HTTPMessageBusClient implements MessageBusClientInterface {
     client: unknown;
     proxyURL: string;
-    constructor(proxyURL: string) {
+    twinId: number;
+    constructor(twinId: number, proxyURL: string) {
         this.proxyURL = proxyURL;
+        this.twinId = twinId;
     }
 
     prepare(command: string, destination: number[], expiration: number, retry: number): Record<string, unknown> {
@@ -26,7 +28,7 @@ class HTTPMessageBusClient implements MessageBusClientInterface {
             cmd: command,
             exp: expiration,
             dat: "",
-            src: destination[0] || 0,
+            src: this.twinId,
             dst: destination,
             ret: "",
             try: retry,

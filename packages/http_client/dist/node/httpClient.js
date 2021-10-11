@@ -18,8 +18,10 @@ function validDestination(dst) {
 class HTTPMessageBusClient {
     client;
     proxyURL;
-    constructor(proxyURL) {
+    twinId;
+    constructor(twinId, proxyURL) {
         this.proxyURL = proxyURL;
+        this.twinId = twinId;
     }
     prepare(command, destination, expiration, retry) {
         return {
@@ -28,7 +30,7 @@ class HTTPMessageBusClient {
             cmd: command,
             exp: expiration,
             dat: "",
-            src: destination[0] || 0,
+            src: this.twinId,
             dst: destination,
             ret: "",
             try: retry,
