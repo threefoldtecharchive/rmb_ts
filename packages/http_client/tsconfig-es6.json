@@ -9,12 +9,9 @@
             "ScriptHost",
             "ES2016.Array.Include"
         ],
-        "types": [
-            "node"
-        ],
         "declaration": true,
         "declarationMap": true,
-        "outDir": "./dist",
+        "outDir": "./dist/es6",
         "esModuleInterop": true,
         "moduleResolution": "node",
         "baseUrl": "."
