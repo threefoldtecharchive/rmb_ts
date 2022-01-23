@@ -1,7 +1,7 @@
 {
     "name": "ts-rmb-http-client",
     "author": "Mahmoud Ayoub",
-    "version": "0.1.8",
+    "version": "1.0.0",
     "dependencies": {
         "@polkadot/keyring": "^8.3.3",
         "axios": "^0.25.0",
