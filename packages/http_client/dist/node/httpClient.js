@@ -6,6 +6,9 @@ Object.defineProperty(exports, "__esModule", { value: true });
 exports.HTTPMessageBusClient = void 0;
 const axios_1 = __importDefault(require("axios"));
 const js_base64_1 = require("js-base64");
+const buffer_1 = require("buffer");
+const keyring_1 = require("@polkadot/keyring");
+const wasm_crypto_1 = require("@polkadot/wasm-crypto");
 function validDestination(dst) {
     if (dst.length > 1) {
         return "Http client does not support multi destinations";
@@ -15,13 +18,33 @@ function validDestination(dst) {
     }
     return "";
 }
+var KeypairType;
+(function (KeypairType) {
+    KeypairType["sr25519"] = "sr25519";
+    KeypairType["ed25519"] = "ed25519";
+})(KeypairType || (KeypairType = {}));
+async function sign(msg, mnemonic, keypairType) {
+    const message = buffer_1.Buffer.from(msg);
+    const keyring = new keyring_1.Keyring({ type: keypairType });
+    await (0, wasm_crypto_1.waitReady)();
+    const keypair = keyring.addFromMnemonic(mnemonic);
+    console.log(mnemonic);
+    const signedMessage = keypair.sign(message);
+    const hexSignedMessage = buffer_1.Buffer.from(signedMessage).toString("hex");
+    return hexSignedMessage;
+}
+;
 class HTTPMessageBusClient {
     client;
     proxyURL;
     twinId;
-    constructor(twinId, proxyURL) {
+    mnemonic;
+    keypairType;
+    constructor(twinId, proxyURL, mnemonic, keypairType = KeypairType.sr25519) {
         this.proxyURL = proxyURL;
         this.twinId = twinId;
+        this.mnemonic = mnemonic;
+        this.keypairType = keypairType;
     }
     prepare(command, destination, expiration, retry) {
         return {
@@ -37,11 +60,17 @@ class HTTPMessageBusClient {
             shm: "",
             now: Math.floor(new Date().getTime() / 1000),
             err: "",
+            sig: "",
+            typ: this.keypairType
         };
     }
     async send(message, payload) {
         try {
             message.dat = js_base64_1.Base64.encode(payload);
+            let sig = "";
+            sig += message.cmd;
+            sig += message.dat;
+            message.sig = await sign(sig, this.mnemonic, this.keypairType);
             const dst = message.dst;
             const retries = message.try; // amount of retries we're willing to do
             const s = validDestination(dst);
