@@ -32,7 +32,6 @@ function sign(msg, mnemonic, keypairType) {
         const keyring = new Keyring({ type: keypairType });
         yield waitReady();
         const keypair = keyring.addFromMnemonic(mnemonic);
-        console.log(mnemonic);
         const signedMessage = keypair.sign(message);
         const hexSignedMessage = Buffer.from(signedMessage).toString("hex");
         return hexSignedMessage;

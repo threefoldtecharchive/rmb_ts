@@ -25,7 +25,6 @@ async function sign(msg: string, mnemonic: string, keypairType: KeypairType) {
     const keyring = new Keyring({ type: keypairType });
     await waitReady();
     const keypair = keyring.addFromMnemonic(mnemonic);
-    console.log(mnemonic);
     const signedMessage = keypair.sign(message);
     const hexSignedMessage = Buffer.from(signedMessage).toString("hex");
     return hexSignedMessage;
