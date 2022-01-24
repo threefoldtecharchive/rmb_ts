@@ -3,7 +3,7 @@ import { Base64 } from "js-base64";
 import { Buffer } from "buffer";
 import { Keyring } from "@polkadot/keyring";
 import { waitReady } from "@polkadot/wasm-crypto";
-
+import { MD5 } from "crypto-js";
 import { MessageBusClientInterface } from "ts-rmb-client-base";
 
 function validDestination(dst: number[]): string {
@@ -21,7 +21,8 @@ enum KeypairType {
 }
 
 async function sign(msg: string, mnemonic: string, keypairType: KeypairType) {
-    const message = Buffer.from(msg);
+    const m = MD5(msg).toString();
+    const message = Buffer.from(m, "hex");
     const keyring = new Keyring({ type: keypairType });
     await waitReady();
     const keypair = keyring.addFromMnemonic(mnemonic);
