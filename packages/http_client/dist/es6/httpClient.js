@@ -12,6 +12,7 @@ import { Base64 } from "js-base64";
 import { Buffer } from "buffer";
 import { Keyring } from "@polkadot/keyring";
 import { waitReady } from "@polkadot/wasm-crypto";
+import { MD5 } from "crypto-js";
 function validDestination(dst) {
     if (dst.length > 1) {
         return "Http client does not support multi destinations";
@@ -28,7 +29,8 @@ var KeypairType;
 })(KeypairType || (KeypairType = {}));
 function sign(msg, mnemonic, keypairType) {
     return __awaiter(this, void 0, void 0, function* () {
-        const message = Buffer.from(msg);
+        const m = MD5(msg).toString();
+        const message = Buffer.from(m, "hex");
         const keyring = new Keyring({ type: keypairType });
         yield waitReady();
         const keypair = keyring.addFromMnemonic(mnemonic);

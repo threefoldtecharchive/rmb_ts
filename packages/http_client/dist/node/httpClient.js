@@ -9,6 +9,7 @@ const js_base64_1 = require("js-base64");
 const buffer_1 = require("buffer");
 const keyring_1 = require("@polkadot/keyring");
 const wasm_crypto_1 = require("@polkadot/wasm-crypto");
+const crypto_js_1 = require("crypto-js");
 function validDestination(dst) {
     if (dst.length > 1) {
         return "Http client does not support multi destinations";
@@ -24,7 +25,8 @@ var KeypairType;
     KeypairType["ed25519"] = "ed25519";
 })(KeypairType || (KeypairType = {}));
 async function sign(msg, mnemonic, keypairType) {
-    const message = buffer_1.Buffer.from(msg);
+    const m = (0, crypto_js_1.MD5)(msg).toString();
+    const message = buffer_1.Buffer.from(m, "hex");
     const keyring = new keyring_1.Keyring({ type: keypairType });
     await (0, wasm_crypto_1.waitReady)();
     const keypair = keyring.addFromMnemonic(mnemonic);
