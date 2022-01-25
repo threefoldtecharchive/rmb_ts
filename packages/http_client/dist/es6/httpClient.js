@@ -27,6 +27,22 @@ var KeypairType;
     KeypairType["sr25519"] = "sr25519";
     KeypairType["ed25519"] = "ed25519";
 })(KeypairType || (KeypairType = {}));
+function challenge(msg) {
+    let out = "";
+    out += msg.ver;
+    out += msg.uid;
+    out += msg.cmd;
+    out += msg.dat;
+    out += msg.src;
+    for (const d of msg.dst) {
+        out += d;
+    }
+    out += msg.dst;
+    out += msg.ret;
+    out += msg.now;
+    out += msg.pxy;
+    return out;
+}
 function sign(msg, mnemonic, keypairType) {
     return __awaiter(this, void 0, void 0, function* () {
         const m = MD5(msg).toString();
@@ -36,7 +52,8 @@ function sign(msg, mnemonic, keypairType) {
         const keypair = keyring.addFromMnemonic(mnemonic);
         const signedMessage = keypair.sign(message);
         const hexSignedMessage = Buffer.from(signedMessage).toString("hex");
-        return hexSignedMessage;
+        const type = keypairType == KeypairType.sr25519 ? "s" : "e";
+        return type + hexSignedMessage;
     });
 }
 ;
@@ -62,28 +79,26 @@ class HTTPMessageBusClient {
             now: Math.floor(new Date().getTime() / 1000),
             err: "",
             sig: "",
-            typ: this.keypairType
         };
     }
     send(message, payload) {
         return __awaiter(this, void 0, void 0, function* () {
             try {
                 message.dat = Base64.encode(payload);
-                let sig = "";
-                sig += message.cmd;
-                sig += message.dat;
-                message.sig = yield sign(sig, this.mnemonic, this.keypairType);
                 const dst = message.dst;
                 const retries = message.try; // amount of retries we're willing to do
                 const s = validDestination(dst);
                 if (s) {
                     throw new Error(s);
                 }
-                const body = JSON.stringify(message);
                 const url = `${this.proxyURL}/twin/${dst[0]}`;
                 let msgIdentifier;
                 for (let i = 1; i <= retries; i++) {
                     try {
+                        message.now = Math.floor(new Date().getTime() / 1000);
+                        const challengeMessage = challenge(message);
+                        message.sig = yield sign(challengeMessage, this.mnemonic, this.keypairType);
+                        const body = JSON.stringify(message);
                         console.log(`Sending {try ${i}}: ${url}`);
                         const res = yield axios.post(url, body);
                         console.log(`Sending {try ${i}}: Success`);
