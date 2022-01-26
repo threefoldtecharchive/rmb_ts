@@ -3,7 +3,7 @@
     "author": "Mahmoud Ayoub",
     "version": "1.0.2",
     "dependencies": {
-        "@polkadot/keyring": "^8.3.3",
+        "@polkadot/keyring": "^6.11.1",
         "@types/crypto-js": "^4.1.0",
         "axios": "^0.25.0",
         "buffer": "^6.0.3",
