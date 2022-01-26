@@ -97,12 +97,14 @@ class HTTPMessageBusClient {
     graphqlURL;
     mnemonic;
     keypairType;
-    constructor(twinId, proxyURL, graphqlURL, mnemonic, keypairType = KeypairType.sr25519) {
+    verifyResponse;
+    constructor(twinId, proxyURL, graphqlURL, mnemonic, keypairType = KeypairType.sr25519, verifyResponse = false) {
         this.proxyURL = proxyURL;
         this.twinId = twinId;
         this.graphqlURL = graphqlURL;
         this.mnemonic = mnemonic;
         this.keypairType = keypairType;
+        this.verifyResponse = verifyResponse;
     }
     prepare(command, destination, expiration, retry) {
         return {
@@ -181,7 +183,9 @@ class HTTPMessageBusClient {
                 try {
                     console.log(`Reading {try ${i}}: ${url}`);
                     const res = await axios_1.default.post(url);
-                    await verify(res.data[0], this.graphqlURL);
+                    if (this.verifyResponse) {
+                        await verify(res.data[0], this.graphqlURL);
+                    }
                     return res.data;
                 }
                 catch (error) {

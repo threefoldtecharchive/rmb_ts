@@ -100,12 +100,13 @@ function verify(msg, url) {
     });
 }
 class HTTPMessageBusClient {
-    constructor(twinId, proxyURL, graphqlURL, mnemonic, keypairType = KeypairType.sr25519) {
+    constructor(twinId, proxyURL, graphqlURL, mnemonic, keypairType = KeypairType.sr25519, verifyResponse = false) {
         this.proxyURL = proxyURL;
         this.twinId = twinId;
         this.graphqlURL = graphqlURL;
         this.mnemonic = mnemonic;
         this.keypairType = keypairType;
+        this.verifyResponse = verifyResponse;
     }
     prepare(command, destination, expiration, retry) {
         return {
@@ -187,7 +188,9 @@ class HTTPMessageBusClient {
                     try {
                         console.log(`Reading {try ${i}}: ${url}`);
                         const res = yield axios.post(url);
-                        yield verify(res.data[0], this.graphqlURL);
+                        if (this.verifyResponse) {
+                            yield verify(res.data[0], this.graphqlURL);
+                        }
                         return res.data;
                     }
                     catch (error) {
