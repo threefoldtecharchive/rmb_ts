@@ -16,7 +16,7 @@ async function main() {
     const dstNodeId = 4;
 
     async function deploy() {
-        const rmb = new HTTPMessageBusClient(3, "https://rmbproxy1.devnet.grid.tf");
+        const rmb = new HTTPMessageBusClient(3, "https://gridproxy.test.grid.tf", "https://graphql.dev.grid.tf/graphql", "<mnemonics>");
         const msg = rmb.prepare("zos.statistics.get", [dstNodeId], 0, 2);
         const retMsg = await rmb.send(msg, "{'test':'test'}");
 
