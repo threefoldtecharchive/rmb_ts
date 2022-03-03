@@ -184,25 +184,26 @@ class HTTPMessageBusClient {
                 if (!retqueue) {
                     throw new Error("The Message retqueue is null");
                 }
-                for (let i = 1; i <= retries; i++) {
+                const now = new Date().getTime();
+                while (new Date().getTime() < now + 1000 * 60) {
                     try {
-                        console.log(`Reading {try ${i}}: ${url}`);
+                        console.log(`Reading: ${url}`);
                         const res = yield axios.post(url);
+                        if (!res.data[0]) {
+                            throw Error("Couldn't get the response");
+                        }
                         if (this.verifyResponse) {
                             yield verify(res.data[0], this.graphqlURL);
                         }
                         return res.data;
                     }
                     catch (error) {
-                        if (i < retries) {
-                            console.log(`try ${i}: cannot read the message, Message: ${error.message}`);
-                        }
-                        else {
-                            throw new Error(error.message);
-                        }
+                        console.log(error.message);
+                        yield new Promise(f => setTimeout(f, 1000));
                     }
-                    console.log("read");
                 }
+                // time exceeded
+                throw Error(`Failed to get a response from twin ${dst[0]} after a minute or couldn't verify the response`);
             }
             catch (error) {
                 throw new Error(error.message);
