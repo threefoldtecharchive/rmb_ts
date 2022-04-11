@@ -54,8 +54,8 @@ async function sign(msg: string, mnemonic: string, keypairType: KeypairType) {
 
 async function getTwinPublicKey(twinId: number, url: string) {
     const query = `query getTwinAccountId($twinId: Int!){
-        twins(where: {twinId_eq: $twinId}) {
-          accountId
+        twins(where: {twinID_eq: $twinId}) {
+          accountID
         }
       }
       `;
@@ -68,7 +68,7 @@ async function getTwinPublicKey(twinId: number, url: string) {
         if (pubkeys.length === 0) {
             throw new Error(`Couldn't find a twin with id: ${twinId}`);
         }
-        return pubkeys[0]["accountId"];
+        return pubkeys[0]["accountID"];
     } catch (e) {
         throw new Error(e.message);
     }
@@ -161,13 +161,14 @@ class HTTPMessageBusClient implements MessageBusClientInterface {
                     message.ret = msgIdentifier.retqueue;
                     return message;
                 } catch (error) {
-                    if (error.response.data) {
-                        console.log(error.response.data.message);
-                    }
                     if (i < retries) {
                         console.log(`try ${i}: cannot send the message, Message: ${error.message}`);
                     } else {
-                        throw new Error(error.message);
+                        let errorMessage = error.message;
+                        if (error.response.data) {
+                            errorMessage = `${errorMessage} due to ${error.response.data}`;
+                        }
+                        throw new Error(errorMessage);
                     }
                 }
             }
@@ -209,6 +210,10 @@ class HTTPMessageBusClient implements MessageBusClientInterface {
             // time exceeded
             throw Error(`Failed to get a response from twin ${dst[0]} after a minute or couldn't verify the response`)
         } catch (error) {
+            let errorMessage = error.message;
+            if (error.response.data) {
+                errorMessage = `${errorMessage} due to ${error.response.data}`;
+            }
             throw new Error(error.message);
         }
     }
