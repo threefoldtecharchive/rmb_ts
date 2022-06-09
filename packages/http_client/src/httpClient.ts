@@ -166,7 +166,7 @@ class HTTPMessageBusClient implements MessageBusClientInterface {
                     } else {
                         let errorMessage = error.message;
                         if (error.response.data) {
-                            errorMessage = `${errorMessage} due to ${error.response.data}`;
+                            errorMessage = `${errorMessage} due to ${error.response.data.Message}`;
                         }
                         throw new Error(errorMessage);
                     }
@@ -212,7 +212,7 @@ class HTTPMessageBusClient implements MessageBusClientInterface {
         } catch (error) {
             let errorMessage = error.message;
             if (error.response.data) {
-                errorMessage = `${errorMessage} due to ${error.response.data}`;
+                errorMessage = `${errorMessage} due to ${error.response.data.Message}`;
             }
             throw new Error(error.message);
         }
