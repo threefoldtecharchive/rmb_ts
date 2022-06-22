@@ -129,7 +129,8 @@ class HTTPMessageBusClient implements MessageBusClientInterface {
             now: Math.floor(new Date().getTime() / 1000),
             err: "",
             sig: "",
-            pxy: true
+            // should be always false for signature compatibility
+            pxy: false
         };
     }
 
@@ -195,7 +196,7 @@ class HTTPMessageBusClient implements MessageBusClientInterface {
                 try {
                     console.log(`Reading: ${url}`);
                     const res = await axios.post(url);
-                    if (!res.data[0]){
+                    if (!res.data[0]) {
                         throw Error("Couldn't get the response")
                     }
                     if (this.verifyResponse) {

@@ -5,11 +5,11 @@ function delay(s: number) {
 }
 
 async function main() {
-    const dstNodeId = 3;
+    const dstNodeId = 127;
 
     async function deploy() {
-        const rmb = new HTTPMessageBusClient("https://rmbproxy1.devnet.grid.tf");
-        const msg = rmb.prepare("zos.statistics.get", [dstNodeId], 0, 2);
+        const rmb = new HTTPMessageBusClient(133, "http://localhost:8055", "https://graphql.dev.grid.tf/graphql", "behave element congress universe grit door reform noise fringe relax shop analyst");
+        const msg = rmb.prepare("zos.statistics.get", [dstNodeId], 1000, 2);
         const retMsg = await rmb.send(msg, "{'test':'test'}");
         // set the retqueue to oringnal message
         await delay(3);
