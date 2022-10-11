@@ -1,6 +1,7 @@
 import redis from "redis";
 import uuid4 from "uuid4";
 import { MessageBusClientInterface } from "ts-rmb-client-base";
+
 class MessageBusClient implements MessageBusClientInterface {
     client: redis;
     constructor(port = 6379) {

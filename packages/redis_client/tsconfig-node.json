@@ -5,7 +5,8 @@
         "declaration": true,
         "outDir": "./dist/node",
         "resolveJsonModule": true,
-        "esModuleInterop": true
+        "esModuleInterop": true,
+        "experimentalDecorators": true
     },
     "include": [
         "src/**/*"
