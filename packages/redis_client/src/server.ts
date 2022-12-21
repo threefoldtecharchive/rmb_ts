@@ -1,90 +1,80 @@
-import redis from "redis";
+import { createClient, RedisClientType } from "redis";
+import { Message } from "ts-rmb-client-base";
 
 class MessageBusServer {
-    client: redis;
+    client: RedisClientType;
     handlers: any;
     constructor(port: number) {
-        const client = redis.createClient(port);
-        client.on("error", function (error) {
+        this.client = createClient({
+            socket: {
+                port: port,
+            },
+        });
+        this.client.connect()
+        this.client.on("error", function (error) {
             console.error(error);
         });
 
-        this.client = client;
         this.handlers = new Map();
     }
 
-    withHandler(topic, handler) {
+    withHandler(topic: string, handler: (message: Message, payload: string) => unknown): void {
         this.handlers.set(`msgbus.${topic}`, handler);
     }
 
-    run() {
+    async run(): Promise<void> {
         console.log("[+] waiting for request");
 
-        const channels = Array.from(this.handlers.keys());
+        const channels: string[] = Array.from(this.handlers.keys());
         channels.forEach(ch => {
             console.log(`[+] watching ${ch}`);
         });
 
-        channels.push(0);
+        const result = await this.client.blPop(channels, 0)
+        if (result) {
+            const { key, element } = result
 
-        const _this = this;
-        this.client.blpop(channels, async function (err, response) {
-            if (err) console.log(err);
-
-            const [channel, request] = response;
-
-            if (!_this.handlers.has(channel)) {
-                console.log(`handler ${channel} is not initialized, skipping`);
+            if (!this.handlers.has(key)) {
+                console.log(`handler ${key} is not initialized, skipping`);
                 return;
             }
 
-            const parsedRequest = JSON.parse(request);
+            const parsedRequest = JSON.parse(element);
             const payload = Buffer.from(parsedRequest.dat, "base64").toString("ascii");
 
-            const handler = _this.handlers.get(channel);
+            const handler = this.handlers.get(key);
 
             try {
                 const data = await handler(parsedRequest, payload);
                 console.log(`data from handler: ${data}`);
-                _this.reply(parsedRequest, data);
+                await this.reply(parsedRequest, data);
             } catch (error) {
-                _this.error(parsedRequest, error);
+                await this.error(parsedRequest, error as string);
             }
+        }
 
-            _this.run();
-        });
+        this.run();
     }
 
-    reply(message, payload) {
+    async reply(message: Message, payload: string): Promise<void> {
         const source = message.src;
-
         message.dat = Buffer.from(JSON.stringify(payload)).toString("base64");
         message.src = message.dst[0];
         message.dst = [source];
         message.now = Math.floor(new Date().getTime() / 1000);
-
-        this.client.lpush(message.ret, JSON.stringify(message), function (err, r) {
-            console.log("[+] response sent to caller");
-            console.log(err, r);
-        });
+        await this.client.lPush(message.ret, JSON.stringify(message))
     }
 
-    error(message, reason) {
+    async error(message: Message, reason: string): Promise<void> {
         console.log("[-] replying error: " + reason);
 
+        const source = message.src;
         message.dat = "";
         message.src = message.dst[0];
-        message.dst = [message.src];
+        message.dst = [source];
         message.now = Math.floor(new Date().getTime() / 1000);
         message.err = String(reason);
-
-        this.client.lpush(message.ret, JSON.stringify(message), function (err, r) {
-            if (err) {
-                console.log(err, r);
-                return;
-            }
-            console.log("[+] error response sent to caller");
-        });
+        await this.client.lPush(message.ret, JSON.stringify(message));
     }
 }
 

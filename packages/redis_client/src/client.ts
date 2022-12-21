@@ -1,18 +1,21 @@
-import redis from "redis";
+import { createClient, RedisClientType } from "redis";
 import uuid4 from "uuid4";
-import { MessageBusClientInterface } from "ts-rmb-client-base";
+import { MessageBusClientInterface, Message } from "ts-rmb-client-base";
 class MessageBusClient implements MessageBusClientInterface {
-    client: redis;
+    client: RedisClientType
     constructor(port = 6379) {
-        const client = redis.createClient(port);
-        client.on("error", function (error) {
+        this.client = createClient({
+            socket: {
+                port: port,
+            },
+        });
+        this.client.connect()
+        this.client.on("error", function (error) {
             console.error(error);
         });
-
-        this.client = client;
     }
 
-    prepare(command: string, destination: number[], expiration: number, retry: number): Record<string, unknown> {
+    prepare(command: string, destination: number[], expiration: number, retry: number): Message {
         return {
             ver: 1,
             uid: "",
@@ -26,41 +29,32 @@ class MessageBusClient implements MessageBusClientInterface {
             shm: "",
             now: Math.floor(new Date().getTime() / 1000),
             err: "",
+            sig: "",
+            pxy: false
         };
     }
 
-    async send(message: Record<string, unknown>, payload: string): Promise<Record<string, unknown>> {
+    async send(message: Message, payload: string): Promise<Message> {
         const buffer = Buffer.from(payload);
         message.dat = buffer.toString("base64");
         const request = JSON.stringify(message);
-
-        this.client.lpush(["msgbus.system.local", request], redis.print);
+        await this.client.lPush("msgbus.system.local", request);
         console.log(request);
         return message;
     }
 
-    read(message: Record<string, unknown>): Promise<Record<string, unknown>[]> {
-        return new Promise((resolve, reject) => {
-            console.log("waiting reply", message.ret);
-
-            const responses = [];
-
-            this.client.blpop(message.ret, 0, function (err, reply) {
-                if (err) {
-                    console.log(`err while waiting for reply: ${err}`);
-                    reject(err);
-                }
-
-                const response = JSON.parse(reply[1]);
-                response["dat"] = Buffer.from(response["dat"], "base64").toString("ascii");
+    async read(message: Message): Promise<Message[]> {
+        console.log("waiting reply", message.ret);
+        const responses = [];
+        for (let i = 0; i < message.dst.length; i++) {
+            const res = await this.client.blPop(message.ret, 0)
+            if (res) {
+                const response = JSON.parse(res.element);
+                response.dat = Buffer.from(response.dat, "base64").toString("ascii");
                 responses.push(response);
-                const msgDst = message.dst as number[];
-                // checking if we have all responses
-                if (responses.length == msgDst.length) {
-                    resolve(responses);
-                }
-            });
-        });
+            }
+        }
+        return responses
     }
 }
 
