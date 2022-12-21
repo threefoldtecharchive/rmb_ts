@@ -4,7 +4,7 @@ import { Buffer } from "buffer";
 import { Keyring } from "@polkadot/keyring";
 import { waitReady } from "@polkadot/wasm-crypto";
 import { MD5 } from "crypto-js";
-import { MessageBusClientInterface } from "ts-rmb-client-base";
+import { Message, MessageBusClientInterface } from "ts-rmb-client-base";
 
 function validDestination(dst: number[]): string {
     if (dst.length > 1) {
@@ -20,7 +20,7 @@ enum KeypairType {
     ed25519 = "ed25519"
 }
 
-function challenge(msg: Record<string, unknown>) {
+function challenge(msg: Message): string {
     let out = "";
     out += msg.ver;
     out += msg.uid;
@@ -114,7 +114,7 @@ class HTTPMessageBusClient implements MessageBusClientInterface {
         this.verifyResponse = verifyResponse;
     }
 
-    prepare(command: string, destination: number[], expiration: number, retry: number): Record<string, unknown> {
+    prepare(command: string, destination: number[], expiration: number, retry: number): Message {
         return {
             ver: 1,
             uid: "",
@@ -133,18 +133,17 @@ class HTTPMessageBusClient implements MessageBusClientInterface {
         };
     }
 
-    async send(message: Record<string, unknown>, payload: string): Promise<Record<string, unknown>> {
+    async send(message: Message, payload: string): Promise<Message> {
         try {
             message.dat = Base64.encode(payload);
-            const dst = message.dst as number[];
-            const retries = message.try as number; // amount of retries we're willing to do
+            const dst = message.dst;
+            const retries = message.try; // amount of retries we're willing to do
             const s = validDestination(dst);
             if (s) {
                 throw new Error(s);
             }
 
             const url = `${this.proxyURL}/twin/${dst[0]}`;
-            let msgIdentifier: Record<string, string>;
 
             for (let i = 1; i <= retries; i++) {
                 try {
@@ -156,8 +155,7 @@ class HTTPMessageBusClient implements MessageBusClientInterface {
                     console.log(`Sending {try ${i}}: ${url}`);
                     const res = await axios.post(url, body);
                     console.log(`Sending {try ${i}}: Success`);
-                    msgIdentifier = JSON.parse(JSON.stringify(res.data));
-                    console.log(msgIdentifier);
+                    const msgIdentifier = JSON.parse(JSON.stringify(res.data));
                     message.ret = msgIdentifier.retqueue;
                     return message;
                 } catch (error) {
@@ -177,10 +175,10 @@ class HTTPMessageBusClient implements MessageBusClientInterface {
         }
     }
 
-    async read(message: Record<string, unknown>): Promise<Record<string, unknown>[]> {
+    async read(message: Message): Promise<Message[]> {
         try {
-            const dst = message.dst as number[];
-            const retries = message.try as number; // amount of retries we're willing to do
+            const dst = message.dst;
+            const retries = message.try; // amount of retries we're willing to do
             const s = validDestination(dst);
             const retqueue = message.ret;
             const url = `${this.proxyURL}/twin/${dst[0]}/${retqueue}`;
@@ -195,7 +193,7 @@ class HTTPMessageBusClient implements MessageBusClientInterface {
                 try {
                     console.log(`Reading: ${url}`);
                     const res = await axios.post(url);
-                    if (!res.data[0]){
+                    if (!res.data[0]) {
                         throw Error("Couldn't get the response")
                     }
                     if (this.verifyResponse) {
