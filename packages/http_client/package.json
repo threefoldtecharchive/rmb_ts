@@ -1,7 +1,7 @@
 {
     "name": "ts-rmb-http-client",
     "author": "Mahmoud Ayoub",
-    "version": "1.0.7",
+    "version": "1.1.0",
     "dependencies": {
         "@polkadot/keyring": "^9.6.2",
         "@types/crypto-js": "^4.1.0",
@@ -9,7 +9,7 @@
         "buffer": "^6.0.3",
         "crypto-js": "^4.1.1",
         "js-base64": "^3.7.2",
-        "ts-rmb-client-base": "^0.0.1"
+        "ts-rmb-client-base": "1.0.0"
     },
     "exports": {
         "require": "./dist/node/index.js",
