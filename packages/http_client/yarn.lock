@@ -1552,8 +1552,10 @@ to-regex-range@^5.0.1:
   dependencies:
     is-number "^7.0.0"
 
-"ts-rmb-client-base@file:../base":
-  version "0.0.1"
+ts-rmb-client-base@1.0.0:
+  version "1.0.0"
+  resolved "https://registry.yarnpkg.com/ts-rmb-client-base/-/ts-rmb-client-base-1.0.0.tgz#8c30d62cca413713956c804da5e1e54c0770395d"
+  integrity sha512-a4jHR1P1fJYVaL88SNrgt+xHNOyrgx/vgENx/xlMDNQ7R9WVUdCTrrxQ3smCvMhsiRa2YnasuGzoIvDAbyHiDg==
 
 tslib@^1.8.1:
   version "1.14.1"
