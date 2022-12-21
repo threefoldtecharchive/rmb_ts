@@ -1,11 +1,11 @@
 {
     "name": "ts-rmb-redis-client",
     "author": "Mohammed Essam",
-    "version": "0.0.1",
+    "version": "1.0.0",
     "dependencies": {
         "@types/node": "^16.4.10",
-        "redis": "^3.1.2",
-        "ts-rmb-client-base": "0.0.1",
+        "redis": "^4.3.1",
+        "ts-rmb-client-base": "1.0.0",
         "typescript": "^4.3.5",
         "uuid4": "^2.0.2"
     },
@@ -18,12 +18,14 @@
         "/dist"
     ],
     "devDependencies": {
+        "@types/uuid4": "^2.0.0",
         "@typescript-eslint/eslint-plugin": "^4.31.2",
         "@typescript-eslint/parser": "^4.31.2",
         "eslint": "^7.32.0",
         "eslint-plugin-prettier": "^4.0.0",
         "npm-run-all": "^4.1.5",
         "prettier": "^2.4.1",
+        "ts-node": "^10.9.1",
         "typescript": "^4.4.3"
     },
     "scripts": {
