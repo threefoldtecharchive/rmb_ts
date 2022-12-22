@@ -178,7 +178,6 @@ class HTTPMessageBusClient implements MessageBusClientInterface {
     async read(message: Message): Promise<Message[]> {
         try {
             const dst = message.dst;
-            const retries = message.try; // amount of retries we're willing to do
             const s = validDestination(dst);
             const retqueue = message.ret;
             const url = `${this.proxyURL}/twin/${dst[0]}/${retqueue}`;
@@ -189,7 +188,7 @@ class HTTPMessageBusClient implements MessageBusClientInterface {
                 throw new Error("The Message retqueue is null");
             }
             const now = new Date().getTime();
-            while (new Date().getTime() < now + 1000 * 60) {
+            while (new Date().getTime() < now + 1000 * message.exp) {
                 try {
                     console.log(`Reading: ${url}`);
                     const res = await axios.post(url);
