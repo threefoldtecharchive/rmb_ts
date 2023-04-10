@@ -1,6 +1,6 @@
 import { createClient, RedisClientType } from "redis";
 import uuid4 from "uuid4";
-import { JsonIncomingResponse, JsonOutgoingRequest } from "./types"
+import { IncomingResponse, OutgoingRequest } from "./types"
 
 class MessageBusClient {
     client: RedisClientType
@@ -23,7 +23,7 @@ class MessageBusClient {
 
     async send(requestCommand: string, requestData: string, destinationTwinId: number, expirationMinutes: number): Promise<string> {
         const uuid = uuid4()
-        const outgoingRequest: JsonOutgoingRequest = {
+        const outgoingRequest: OutgoingRequest = {
             ver: 1,
             ref: uuid,
             cmd: requestCommand,
@@ -45,7 +45,7 @@ class MessageBusClient {
         const res = await this.client.blPop(requestId, timeoutMinutes * 60)
 
         if (res) {
-            const incomingResponse: JsonIncomingResponse = JSON.parse(res.element)
+            const incomingResponse: IncomingResponse = JSON.parse(res.element)
             if (incomingResponse.err) {
                 throw Error(`Failed to read response due to: ${incomingResponse.err.message}`)
             }

@@ -1,4 +1,4 @@
-interface JsonIncomingRequest {
+interface IncomingRequest {
     ver: number,
     ref: string,
     src: string,
@@ -12,22 +12,22 @@ interface JsonIncomingRequest {
 }
 
 
-interface JsonError {
+interface Error {
     code: number,
     message: string
 }
 
-interface JsonOutgoingResponse {
+interface OutgoingResponse {
     ver: number,
     ref: string,
     dat: string,
     dst: string,
     shm: string,
     now: number,
-    err: JsonError | null,
+    err: Error | null,
 }
 
-interface JsonOutgoingRequest {
+interface OutgoingRequest {
     ver: number,
     ref: string,
     cmd: string,
@@ -41,21 +41,21 @@ interface JsonOutgoingRequest {
 }
 
 
-interface JsonIncomingResponse {
+interface IncomingResponse {
     ver: number,
     ref: string,
     dat: string,
     src: string,
     shm: string,
     now: number,
-    err: JsonError | null,
+    err: Error | null,
 }
 
 
 export {
-    JsonError,
-    JsonIncomingRequest,
-    JsonIncomingResponse,
-    JsonOutgoingRequest,
-    JsonOutgoingResponse
+    Error,
+    IncomingRequest,
+    IncomingResponse,
+    OutgoingRequest,
+    OutgoingResponse
 }

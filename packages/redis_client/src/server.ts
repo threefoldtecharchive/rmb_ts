@@ -1,5 +1,5 @@
 import { createClient, RedisClientType } from "redis";
-import { JsonIncomingRequest, JsonOutgoingResponse } from "./types"
+import { IncomingRequest, OutgoingResponse } from "./types"
 
 class MessageBusServer {
     client: RedisClientType;
@@ -18,7 +18,7 @@ class MessageBusServer {
         this.handlers = new Map();
     }
 
-    withHandler(topic: string, handler: { message: JsonIncomingRequest, payload: string }): void {
+    withHandler(topic: string, handler: { message: IncomingRequest, payload: string }): void {
         this.handlers.set(`msgbus.${topic}`, handler);
     }
 
@@ -56,8 +56,8 @@ class MessageBusServer {
         this.run();
     }
 
-    async reply(message: JsonIncomingRequest, payload: string): Promise<void> {
-        const replyMessage: JsonOutgoingResponse = {
+    async reply(message: IncomingRequest, payload: string): Promise<void> {
+        const replyMessage: OutgoingResponse = {
             dat: Buffer.from(JSON.stringify(payload)).toString("base64"),
             dst: message.src,
             now: Math.floor(new Date().getTime() / 1000),
@@ -69,10 +69,10 @@ class MessageBusServer {
         await this.client.lPush(message.ret, JSON.stringify(replyMessage))
     }
 
-    async error(message: JsonIncomingRequest, reason: string): Promise<void> {
+    async error(message: IncomingRequest, reason: string): Promise<void> {
         console.log("[-] replying error: " + reason);
 
-        const replyMessage: JsonOutgoingResponse = {
+        const replyMessage: OutgoingResponse = {
             dat: "",
             dst: message.src,
             now: Math.floor(new Date().getTime() / 1000),
