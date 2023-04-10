@@ -1,5 +1,5 @@
 import { createClient, RedisClientType } from "redis";
-import { Message } from "ts-rmb-client-base";
+import { IncomingRequest, OutgoingResponse } from "./types"
 
 class MessageBusServer {
     client: RedisClientType;
@@ -18,7 +18,7 @@ class MessageBusServer {
         this.handlers = new Map();
     }
 
-    withHandler(topic: string, handler: (message: Message, payload: string) => unknown): void {
+    withHandler(topic: string, handler: { message: IncomingRequest, payload: string }): void {
         this.handlers.set(`msgbus.${topic}`, handler);
     }
 
@@ -56,25 +56,32 @@ class MessageBusServer {
         this.run();
     }
 
-    async reply(message: Message, payload: string): Promise<void> {
-        const source = message.src;
-        message.dat = Buffer.from(JSON.stringify(payload)).toString("base64");
-        message.src = message.dst[0];
-        message.dst = [source];
-        message.now = Math.floor(new Date().getTime() / 1000);
-        await this.client.lPush(message.ret, JSON.stringify(message))
+    async reply(message: IncomingRequest, payload: string): Promise<void> {
+        const replyMessage: OutgoingResponse = {
+            dat: Buffer.from(JSON.stringify(payload)).toString("base64"),
+            dst: message.src,
+            now: Math.floor(new Date().getTime() / 1000),
+            ref: message.ref,
+            shm: message.shm,
+            ver: message.ver,
+            err: null
+        }
+        await this.client.lPush(message.ret, JSON.stringify(replyMessage))
     }
 
-    async error(message: Message, reason: string): Promise<void> {
+    async error(message: IncomingRequest, reason: string): Promise<void> {
         console.log("[-] replying error: " + reason);
 
-        const source = message.src;
-        message.dat = "";
-        message.src = message.dst[0];
-        message.dst = [source];
-        message.now = Math.floor(new Date().getTime() / 1000);
-        message.err = String(reason);
-        await this.client.lPush(message.ret, JSON.stringify(message));
+        const replyMessage: OutgoingResponse = {
+            dat: "",
+            dst: message.src,
+            now: Math.floor(new Date().getTime() / 1000),
+            ref: message.ref,
+            shm: message.shm,
+            ver: message.ver,
+            err: { message: String(reason), code: 500 }
+        }
+        await this.client.lPush(message.ret, JSON.stringify(replyMessage));
     }
 }
 
