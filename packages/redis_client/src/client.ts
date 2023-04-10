@@ -27,7 +27,7 @@ class MessageBusClient {
             ver: 1,
             ref: uuid,
             cmd: requestCommand,
-            exp: expirationMinutes,
+            exp: expirationMinutes * 60,
             dat: Buffer.from(requestData).toString("base64"),
             tag: "",
             dst: [destinationTwinId],
