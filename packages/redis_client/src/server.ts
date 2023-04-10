@@ -1,4 +1,5 @@
 import { createClient, RedisClientType } from "redis";
+import { JsonIncomingRequest, JsonOutgoingResponse } from "./types"
 
 class MessageBusServer {
     client: RedisClientType;
@@ -56,7 +57,7 @@ class MessageBusServer {
     }
 
     async reply(message: JsonIncomingRequest, payload: string): Promise<void> {
-        let replyMessage: JsonOutgoingResponse = {
+        const replyMessage: JsonOutgoingResponse = {
             dat: Buffer.from(JSON.stringify(payload)).toString("base64"),
             dst: message.src,
             now: Math.floor(new Date().getTime() / 1000),
@@ -71,7 +72,7 @@ class MessageBusServer {
     async error(message: JsonIncomingRequest, reason: string): Promise<void> {
         console.log("[-] replying error: " + reason);
 
-        let replyMessage: JsonOutgoingResponse = {
+        const replyMessage: JsonOutgoingResponse = {
             dat: "",
             dst: message.src,
             now: Math.floor(new Date().getTime() / 1000),
