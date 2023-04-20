@@ -129,7 +129,8 @@ class HTTPMessageBusClient implements MessageBusClientInterface {
             now: Math.floor(new Date().getTime() / 1000),
             err: "",
             sig: "",
-            pxy: true
+            // should be always false for signature compatibility
+            pxy: false
         };
     }
 
